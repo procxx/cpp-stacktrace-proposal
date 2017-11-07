@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+        <title>A Proposal to add stack trace library</title>
+        <meta content="http://schemas.microsoft.com/intellisense/ie5" name="vs_targetSchema">
+        <meta http-equiv="Content-Language" content="en-us">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        <style type="text/css">
+            .addition { color: green; }
+            .right { float:right; }
+            .changed-deleted { background-color: #CFF0FC ; text-decoration: line-through; display: none; }
+            .addition.changed-deleted { color: green; background-color: #CFF0FC ; text-decoration: line-through; text-decoration: black double line-through; display: none; }
+            .changed-added { background-color: #CFF0FC ;}
+            .notes { background-color: #80D080 ;}
+            pre { line-height: 1.2; font-size: 10pt; margin-top: 25px; }
+            .desc { margin-left: 35px; margin-top: 10px; padding:0; white-space: normal; }
+            body {max-width: 1024px; margin-left: 25px;}
+            .cppkeyword { color: blue; }
+            .cppcomment { color: green; }
+            .cppcomment > .cppkeyword{ color: green; }
+            .cpptext { color: #2E8B57; }
+        </style>
+    </head>
+    <body bgcolor="#ffffff">
+        <address>Document number: P???R0</address>
+        <address>Project: Programming Language C++</address>
+        <address>Audience: SG14 Library Evolution</address>
+        <address>&nbsp;</address>
+        <address>Alexey Gorgurov &lt;<a href="mailto:leha-bot@yandex.ru">leha-bot@yandex.ru</a>&gt;, &lt;<a href="mailto:no-vista@yandex.ru">no-vista@yandex.ru</a>&gt;</address>
+        <address>Antony Polukhin &lt;<a href="mailto:antoshkka@gmail.com">antoshkka@gmail.com</a>&gt;, &lt;<a href="mailto:antoshkka@yandex-team.ru">antoshkka@yandex-team.ru</a>&gt;</address>
+        <address>&nbsp;</address>
+        <address>Date: 2017-10-03</address>
+        <h1>A Proposal to add stack trace library</h1>
+
+        <span class='changed-added'>Significant changes to <a href="http://github.com/leha-bot/cpp-stacktrace-proposal">P????R?</a> are marked with blue.</span> <button onclick="show_hide_deleted()">Show/Hide deleted lines from P????R?</button>
+        <p class='notes'>Green lines are notes for the <b>editor</b> or for the <b>SG6</b> that must not be treated as part of the wording.</p>
+        <h2>I. Introduction and Motivation</h2>
+	<p>Current compilers can print a stack trace while debugging or crash dump for debugging purposes. The compiler's users also can get a stack trace via implementation-defined API. But there is no cross-platform solution (except Boost.Stacktrace on which this Proposal is based of).</p>
+	<p>This is an attempt to solve the problem in a generic way on a library level and provide wording for thing being a standard de-facto on all compilers.</p>
+        <p>A proof of concept implementation available at: <a href="https://github.com/boostorg/stacktrace">https://github.com/boostorg/stacktrace</a>.</p>
+<!--
+		NOTE: saved for example.
+        <h2>II. Changelog</h2>
+        <p>Differences with P????R0:</p>
+        <ul>
+           <li></li>
+        </ul>
+
+-->
+        <h2>II. Proposed wording</h2>
+	<p>X. Stacktrace library <span class="right">[stacktrace]</span></p>
+	<p>X.1. General <span class="right">[stacktrace.general]</span></p>
+	<p>X.2. Classes <span class="right">[stacktrace.classes]</span></p>
+	<p>X.2.1. Header &lt;stacktrace&gt; <span class="right">[stacktrace.syn]</span></p>
+	<p>X.2.2. Class template basic_stacktrace <span class="right">[basic.stacktrace]</span></p>
+	<p>X.2.2.1. basic_stacktrace non-member functions <span class="right">[stacktrace.nonmembers]</span></p>
+	<p>X.2.2.1.1. </p>
+	<p>X.2.2. Header &lt;stacktrace_fwd&gt; <span class="right">[stacktrace.fwd]</span></p>
+        <h2>III. Feature-testing macro</h2>
+        <p>For the purposes of SG10 we recommend the feature-testing macro name <code>__cpp_lib_stacktrace</code>.</p>
+
+        <script type="text/javascript">
+            function colorize_texts(texts) {
+                for (var i = 0; i < texts.length; ++i) {
+                    var text = texts[i].innerHTML;
+                    text = text.replace(/namespace|enum|void|constexpr|extern|noexcept|bool|template|class |struct|auto|const|typename|explicit|public|private|operator|#include|inline| char|typedef|static_assert|static_cast|static/g,"<span class='cppkeyword'>$&<\/span>");
+                    text = text.replace(/\/\/[\s\S]+?\n/g,"<span class='cppcomment'>$&<\/span>");
+                    texts[i].innerHTML = text;
+                }
+            }
+
+            colorize_texts(document.getElementsByTagName("pre"));
+            colorize_texts(document.getElementsByTagName("code"));
+
+            var show = false;
+            function show_hide_deleted() {
+                var to_change = document.getElementsByClassName('changed-deleted');
+                for (var i = 0; i < to_change.length; ++i) {
+                    to_change[i].style.display = (show ? 'block' : 'none');
+                }
+
+                show = !show;
+            }
+            show_hide_deleted()
+        </script>
+</body></html>
