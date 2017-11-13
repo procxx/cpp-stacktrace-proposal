@@ -34,10 +34,22 @@
 
         <span class='changed-added'>Significant changes to <a href="http://github.com/leha-bot/cpp-stacktrace-proposal">P????R?</a> are marked with blue.</span> <button onclick="show_hide_deleted()">Show/Hide deleted lines from P????R?</button>
         <p class='notes'>Green lines are notes for the <b>editor</b> or for the <b>SG6</b> that must not be treated as part of the wording.</p>
-        <h2>I. Introduction and Motivation</h2>
-	<p>Current compilers can print a stack trace while debugging or crash dump for debugging purposes. The compiler's users also can get a stack trace via implementation-defined API. But there is no cross-platform solution (except Boost.Stacktrace on which this Proposal is based of).</p>
+        <h2>I. Motivation</h2>
+	<p>At this time there is no standard solution to get the calls sequence that results in unhandled exception, std::terminate or assertion failure. That sequence is widely used in another programming languages (like Java, C#, Python) for debugging and post mortem debugging.
+	</p>
+	<p>Pretty often assertions can't describe the whole picture of bug and does not provide enough information to locate the problem. For example, you can see the following message on out-of-range access:
+	</p>
+	<p><code>
+	../../../boost/array.hpp:123: T& boost::array<T, N>::operator[](boost::array<T, N>::size_type) [with T = int; long unsigned int N = 5ul]: Assertion '(i < N)&&("out of range")' failed.
+Aborted (core dumped)</code>
+	</p>
+	<p>This assert can be in any translation unit including the <code>boost/array.hpp</code> header.</p>
+	<p>We propose two headers (<code>&lt;stacktrace&gt;</code> and <code>&lt;frame&gt;</code>), two classes (<code>template &lt;typename Allocator&gt;class basic_stacktrace</code> and <code>class frame</code>) and several functions for safe stack frames dump.</p>
+
+	<!--<p>Current compilers can print a stack trace while debugging or crash dump for debugging purposes. The compiler's users also can get a stack trace via implementation-defined API. But there is no cross-platform solution (except Boost.Stacktrace on which this Proposal is based of).</p>
 	<p>This is an attempt to solve the problem in a generic way on a library level and provide wording for thing being a standard de-facto on all compilers.</p>
         <p>A proof of concept implementation available at: <a href="https://github.com/boostorg/stacktrace">https://github.com/boostorg/stacktrace</a>.</p>
+		-->
 <!--
 		NOTE: saved for example.
         <h2>II. Changelog</h2>
@@ -47,6 +59,7 @@
         </ul>
 
 -->
+<!--
         <h2>II. Proposed wording</h2>
 	<p>X. Stacktrace library <span class="right">[stacktrace]</span></p>
 	<p>X.1. General <span class="right">[stacktrace.general]</span></p>
@@ -56,7 +69,8 @@
 	<p>X.2.2.1. basic_stacktrace non-member functions <span class="right">[stacktrace.nonmembers]</span></p>
 	<p>X.2.2.1.1. </p>
 	<p>X.2.2. Header &lt;stacktrace_fwd&gt; <span class="right">[stacktrace.fwd]</span></p>
-        <h2>III. Feature-testing macro</h2>
+	-->
+        <h2>II. Feature-testing macro</h2>
         <p>For the purposes of SG10 we recommend the feature-testing macro name <code>__cpp_lib_stacktrace</code>.</p>
 
         <script type="text/javascript">
@@ -84,3 +98,4 @@
             show_hide_deleted()
         </script>
 </body></html>
+
