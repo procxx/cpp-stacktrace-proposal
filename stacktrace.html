@@ -33,7 +33,7 @@
         <h1>A Proposal to add stack trace library</h1>
 
         <span class='changed-added'>Significant changes to <a href="http://github.com/leha-bot/cpp-stacktrace-proposal">P????R?</a> are marked with blue.</span> <button onclick="show_hide_deleted()">Show/Hide deleted lines from P????R?</button>
-        <p class='notes'>Green lines are notes for the <b>editor</b> or for the <b>SG6</b> that must not be treated as part of the wording.</p>
+        <p class='notes'>Green lines are notes for the <b>editor</b> or for the <b>SG14</b> that must not be treated as part of the wording.</p>
         <h2>I. Motivation</h2>
 	<p>At this time there is no standard solution to get the calls sequence that results in unhandled exception, std::terminate or assertion failure. That sequence is widely used in another programming languages (like Java, C#, Python) for debugging and post mortem debugging.
 	</p>
@@ -44,6 +44,20 @@
 Aborted (core dumped)</code>
 	</p>
 	<p>This assert can be in any translation unit including the <code>boost/array.hpp</code> header.</p>
+	<p>With adding of the proposed classes you may see the following message:
+	<pre>
+Expression 'i < N' is false in function 'T& boost::array<T, N>::operator[](boost::array<T, N>::size_type) [with T = int; long unsigned int N = 5ul; boost::array<T, N>::reference = int&; boost::array<T, N>::size_type = long unsigned int]': out of range.
+Backtrace:
+ 0# boost::assertion_failed_msg(char const*, char const*, char const*, char const*, long) at ../example/assert_handler.cpp:39
+ 1# boost::array<int, 5ul>::operator[](unsigned long) at ../../../boost/array.hpp:124
+ 2# bar(int) at ../example/assert_handler.cpp:17
+ 3# foo(int) at ../example/assert_handler.cpp:25
+ 4# bar(int) at ../example/assert_handler.cpp:17
+ 5# foo(int) at ../example/assert_handler.cpp:25
+ 6# main at ../example/assert_handler.cpp:54
+ 7# 0x00007F991FD69F45 in /lib/x86_64-linux-gnu/libc.so.6
+ 8# 0x0000000000401139
+	</pre>
 	<p>We propose two headers (<code>&lt;stacktrace&gt;</code> and <code>&lt;frame&gt;</code>), two classes (<code>template &lt;typename Allocator&gt;class basic_stacktrace</code> and <code>class frame</code>) and several functions for safe stack frames dump.</p>
 
 	<!--<p>Current compilers can print a stack trace while debugging or crash dump for debugging purposes. The compiler's users also can get a stack trace via implementation-defined API. But there is no cross-platform solution (except Boost.Stacktrace on which this Proposal is based of).</p>
@@ -82,36 +96,36 @@ namespace boost {
   namespace stacktrace {
     template&lt;typename Allocator&gt; class basic_stacktrace;
 
-    typedef basic_stacktrace stacktrace;  // This is the typedef to use unless you'd like to provide a specific allocator to boost::stacktrace::basic_stacktrace.
-    template&lt;typename Allocator1, typename Allocator2&gt;
-      bool operator&lt;(const basic_stacktrace&lt; Allocator1 &gt; &,
+    typedef basic_stacktrace stacktrace;  // This is the typedef to use unless you'd like to provide a specific allocator to boost::stacktrace::basic_stacktrace. 
+    template&lt;typename Allocator1, typename Allocator2&gt; 
+      bool operator&lt;(const basic_stacktrace&lt; Allocator1 &gt; &, 
                      const basic_stacktrace&lt; Allocator2 &gt; &);
-    template&lt;typename Allocator1, typename Allocator2&gt;
-      bool operator==(const basic_stacktrace&lt; Allocator1 &gt; &,
+    template&lt;typename Allocator1, typename Allocator2&gt; 
+      bool operator==(const basic_stacktrace&lt; Allocator1 &gt; &, 
                       const basic_stacktrace&lt; Allocator2 &gt; &);
 
-    // Comparison operators that provide platform dependant ordering and have amortized O(1) complexity; O(size()) worst case complexity; are Async-Handler-Safe.
-    template&lt;typename Allocator1, typename Allocator2&gt;
-      bool operator&gt;(const basic_stacktrace&lt; Allocator1 &gt; & lhs,
+    // Comparison operators that provide platform dependant ordering and have amortized O(1) complexity; O(size()) worst case complexity; are Async-Handler-Safe. 
+    template&lt;typename Allocator1, typename Allocator2&gt; 
+      bool operator&gt;(const basic_stacktrace&lt; Allocator1 &gt; & lhs, 
                      const basic_stacktrace&lt; Allocator2 &gt; & rhs);
-    template&lt;typename Allocator1, typename Allocator2&gt;
-      bool operator&lt;=(const basic_stacktrace&lt; Allocator1 &gt; & lhs,
+    template&lt;typename Allocator1, typename Allocator2&gt; 
+      bool operator&lt;=(const basic_stacktrace&lt; Allocator1 &gt; & lhs, 
                       const basic_stacktrace&lt; Allocator2 &gt; & rhs);
-    template&lt;typename Allocator1, typename Allocator2&gt;
-      bool operator&gt;=(const basic_stacktrace&lt; Allocator1 &gt; & lhs,
+    template&lt;typename Allocator1, typename Allocator2&gt; 
+      bool operator&gt;=(const basic_stacktrace&lt; Allocator1 &gt; & lhs, 
                       const basic_stacktrace&lt; Allocator2 &gt; & rhs);
-    template&lt;typename Allocator1, typename Allocator2&gt;
-      bool operator!=(const basic_stacktrace&lt; Allocator1 &gt; & lhs,
+    template&lt;typename Allocator1, typename Allocator2&gt; 
+      bool operator!=(const basic_stacktrace&lt; Allocator1 &gt; & lhs, 
                       const basic_stacktrace&lt; Allocator2 &gt; & rhs);
 
-    // Fast hashing support, O(st.size()) complexity; Async-Handler-Safe.
-    template&lt;typename Allocator&gt;
+    // Fast hashing support, O(st.size()) complexity; Async-Handler-Safe. 
+    template&lt;typename Allocator&gt; 
       std::size_t hash_value(const basic_stacktrace&lt; Allocator &gt; & st);
 
-    // Outputs stacktrace in a human readable format to output stream; unsafe to use in async handlers.
-    template&lt;typename CharT, typename TraitsT, typename Allocator&gt;
-      std::basic_ostream&lt; CharT, TraitsT &gt; &
-      operator&lt;&lt;(std::basic_ostream&lt; CharT, TraitsT &gt; & os,
+    // Outputs stacktrace in a human readable format to output stream; unsafe to use in async handlers. 
+    template&lt;typename CharT, typename TraitsT, typename Allocator&gt; 
+      std::basic_ostream&lt; CharT, TraitsT &gt; & 
+      operator&lt;&lt;(std::basic_ostream&lt; CharT, TraitsT &gt; & os, 
                  const basic_stacktrace&lt; Allocator &gt; & bt);
   }
 }
@@ -121,7 +135,7 @@ namespace boost {
 namespace boost {
   namespace stacktrace {
 
-    // Comparison operators that provide platform dependant ordering and have O(1) complexity; are Async-Handler-Safe.
+    // Comparison operators that provide platform dependant ordering and have O(1) complexity; are Async-Handler-Safe. 
     constexpr bool operator&lt;(const frame & lhs, const frame & rhs);
     constexpr bool operator&gt;(const frame & lhs, const frame & rhs);
     constexpr bool operator&lt;=(const frame & lhs, const frame & rhs);
@@ -129,15 +143,15 @@ namespace boost {
     constexpr bool operator==(const frame & lhs, const frame & rhs);
     constexpr bool operator!=(const frame & lhs, const frame & rhs);
 
-    // Fast hashing support, O(1) complexity; Async-Handler-Safe.
+    // Fast hashing support, O(1) complexity; Async-Handler-Safe. 
     std::size_t hash_value(const frame & f);
 
-    // Outputs stacktrace::frame in a human readable format to string; unsafe to use in async handlers.
+    // Outputs stacktrace::frame in a human readable format to string; unsafe to use in async handlers. 
     std::string to_string(const frame & f);
 
-    // Outputs stacktrace::frame in a human readable format to output stream; unsafe to use in async handlers.
-    template&lt;typename CharT, typename TraitsT&gt;
-      std::basic_ostream&lt; CharT, TraitsT &gt; &
+    // Outputs stacktrace::frame in a human readable format to output stream; unsafe to use in async handlers. 
+    template&lt;typename CharT, typename TraitsT&gt; 
+      std::basic_ostream&lt; CharT, TraitsT &gt; & 
       operator&lt;&lt;(std::basic_ostream&lt; CharT, TraitsT &gt; & os, const frame & f);
   }
 }
