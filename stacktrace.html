@@ -89,6 +89,63 @@ Backtrace:
 		<h2>III. Design Decisions</h2>
 		<p>The design is based on Boost.Stacktrace, an popular library that does not depend on any non-standard library components and provides the STD-like interface.</p>
 		<p>Note about signal safety: we can't offer the proposal which could be signal-safe on any platform because it's not possible to implement. <!-- add note about custom allocator? --></p>
+		<p>The stack frame sequence is stored inside the <code>basic_stacktrace</code> class, the one stack frame is stored inside the <code>frame</code> class.</p>
+		<h3><code>basic_stacktrace</code> constructors</h3>
+		<h4><code>basic_stacktrace() noexcept;</code></h4>
+		<p>Stores the current function call sequence inside *this without any decoding or any other heavy platform specific operations.</p>
+		<h4><code>explicit basic_stacktrace(const allocator_type & a) noexcept;</code></h4>
+		<p>Stores the current function call sequence inside *this without any decoding or any other heavy platform specific operations.</p>
+		<h4><code>basic_stacktrace(std::size_t skip, std::size_t max_depth, const allocator_type & a = allocator_type()) noexcept;</code></h4>
+		<p>Stores [skip; skip + max_depth) of the current function call sequence inside *this without any decoding or any heavy platform specific operations.</p>
+		<h3><code>basic_stacktrace</code> member functions</h3>
+		<h4><code>size_type size() const noexcept;</code></h4>
+		<h4><code>const_reference operator[](std::size_t frame_no) const noexcept;</code></h4>
+		<p>Returns frame that references the actual frame info, stored inside *this.</p>
+		<p>Parameters: <code>frame_no</code> - zero-based index of frame to return. 0 is the function index where stacktrace was constructed and index close to this->size() contains function main().</p>
+		<h4><code>const_iterator begin() const noexcept;</code></h4>
+		<h4><code>const_iterator cbegin() const noexcept;</code></h4>
+		<h4><code>const_iterator end() const noexcept;</code></h4>
+		<h4><code>const_iterator cend() const noexcept;</code></h4>
+		<h4><code>const_reverse_iterator rbegin() const noexcept;</code></h4>
+		<h4><code>const_reverse_iterator crbegin() const noexcept;</code></h4>
+		<h4><code>const_reverse_iterator rend() const noexcept;</code></h4>
+		<h4><code>const_reverse_iterator crend() const noexcept;</code></h4>
+		<h4><code>explicit operator bool() const noexcept;</code></h4>
+		<p>Allows to check that stack trace capturing was successful.</p>
+		<h4><code>bool empty() const noexcept;</code></h4>
+		<p>Allows to check that stack trace failed.</p>
+		<h4><code>const std::vector&lt; boost::stacktrace::frame, Allocator &gt; & as_vector() const noexcept;</code></h4>
+		<h3><code>basic_stacktrace</code> public static functions</h3>
+		<h4><code>template&lt;typename Char, typename Trait&gt; 
+  static basic_stacktrace 
+  from_dump(std::basic_istream&lt; Char, Trait &gt; & in, 
+            const allocator_type & a = allocator_type());</code></h4>
+		<p>Constructs stacktrace from basic_istreamable that references the dumped stacktrace. Terminating zero frame is discarded.</p>
+		<h4><code>static basic_stacktrace 
+from_dump(const void * begin, std::size_t buffer_size_in_bytes, 
+          const allocator_type & a = allocator_type());</code></h4>
+		<p>Constructs stacktrace from raw memory dump. Terminating zero frame is discarded.</p>
+		<h3><code>frame</code> constructors</h3>
+		<h4><code>frame() noexcept;</code></h4>
+		<h4><code>explicit frame(native_frame_ptr_t addr) noexcept;</code></h4>
+		<p>Constructs frame that references NULL address. Calls to source_file() and source_line() will return empty string. Calls to source_line() will return 0.</p>
+		<h4><code>frame(const frame &) = default;</code></h4>
+		<h4><code>explicit frame(native_frame_ptr_t addr) noexcept;</code></h4>
+		<p>Constructs frame that references addr and could later generate information about that address using platform specific features.</p>
+		<h4><code>template<typename T> explicit frame(T * function_addr) noexcept;</code></h4>
+		<p>Constructs frame that references function_addr and could later generate information about that function using platform specific features.</p>
+		<h4><code>constexpr frame & operator=(const frame &) = default;</code></h4>
+		<h3><code>frame</code> public member functions</h3>
+		<h4><code>std::string name() const;</code></h4>
+		<p>Returns platform specific name of the frame (function name in a human readable form). Throws std::bad_alloc if not enough memory to construct resulting string.</p>
+		<h4><code>constexpr native_frame_ptr_t address() const noexcept;</code></h4>
+		<p>Returns address of the frame function.</p>
+		<h4><code>std::string source_file() const;</code></h4>
+		<p>Returns path to the source file, where the function of the frame is defined. Returns empty string if this->source_line() == 0. Throws std::bad_alloc if not enough memory to construct resulting string.</p>
+		<h4><code>std::string source_line() const;</code></h4>
+		<p>Returns code line in the source line, where the function of the frame is defined. Throws std::bad_alloc if not enough memory to construct resulting string.</p>
+		<h4><code>constexpr bool empty() const;</code></h4>
+		<p>Checks that frame is not references NULL address.</p>
         <h2>IV. Proposed Interface</h2>
 		<h3>Header &lt;stacktrace&gt;</h3>
 		<pre>
