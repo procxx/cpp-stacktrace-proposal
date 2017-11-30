@@ -153,16 +153,18 @@ namespace boost {
   namespace stacktrace {
     template&lt;typename Allocator&gt; class basic_stacktrace;
 
-    typedef basic_stacktrace stacktrace;  // This is the typedef to use unless you'd like to provide a specific allocator to boost::stacktrace::basic_stacktrace. 
-    template&lt;typename Allocator1, typename Allocator2&gt; 
+    typedef basic_stacktrace stacktrace;  // This is the typedef to use unless you'd like to provide a specific allocator to boost::stacktrace::basic_stacktrace. 	
+    <!-- template&lt;typename Allocator1, typename Allocator2&gt; 
       bool operator&lt;(const basic_stacktrace&lt; Allocator1 &gt; &, 
                      const basic_stacktrace&lt; Allocator2 &gt; &);
     template&lt;typename Allocator1, typename Allocator2&gt; 
       bool operator==(const basic_stacktrace&lt; Allocator1 &gt; &, 
-                      const basic_stacktrace&lt; Allocator2 &gt; &);
-
-    // Comparison operators that provide platform dependant ordering and have amortized O(1) complexity; O(size()) worst case complexity; are Async-Handler-Safe. 
-    template&lt;typename Allocator1, typename Allocator2&gt; 
+                      const basic_stacktrace&lt; Allocator2 &gt; &); -->
+    // Auto-generated comparison operators that provide platform dependant ordering and have amortized O(1) complexity; O(size()) worst case complexity; are Async-Handler-Safe.
+	template &lt;typename Allocator1, typename Allocator2&gt;
+	  std::strong_ordering operator &lt;=&gt;(const basic_stacktrace&lt; Allocator1 &gt; & lhs, 
+                     const basic_stacktrace&lt; Allocator2 &gt; & rhs) = default;
+<!--    template&lt;typename Allocator1, typename Allocator2&gt; 
       bool operator&gt;(const basic_stacktrace&lt; Allocator1 &gt; & lhs, 
                      const basic_stacktrace&lt; Allocator2 &gt; & rhs);
     template&lt;typename Allocator1, typename Allocator2&gt; 
@@ -173,8 +175,7 @@ namespace boost {
                       const basic_stacktrace&lt; Allocator2 &gt; & rhs);
     template&lt;typename Allocator1, typename Allocator2&gt; 
       bool operator!=(const basic_stacktrace&lt; Allocator1 &gt; & lhs, 
-                      const basic_stacktrace&lt; Allocator2 &gt; & rhs);
-
+                      const basic_stacktrace&lt; Allocator2 &gt; & rhs); -->
     // Fast hashing support, O(st.size()) complexity; Async-Handler-Safe. 
     template&lt;typename Allocator&gt; 
       std::size_t hash_value(const basic_stacktrace&lt; Allocator &gt; & st);
@@ -193,13 +194,14 @@ namespace boost {
   namespace stacktrace {
 
     // Comparison operators that provide platform dependant ordering and have O(1) complexity; are Async-Handler-Safe. 
-    constexpr bool operator&lt;(const frame & lhs, const frame & rhs);
+	std::strong_ordering operator &lt;=&gt;(const frame & lhs, const frame & rhs) = default;
+<!--    constexpr bool operator&lt;(const frame & lhs, const frame & rhs);
     constexpr bool operator&gt;(const frame & lhs, const frame & rhs);
     constexpr bool operator&lt;=(const frame & lhs, const frame & rhs);
     constexpr bool operator&gt;=(const frame & lhs, const frame & rhs);
     constexpr bool operator==(const frame & lhs, const frame & rhs);
     constexpr bool operator!=(const frame & lhs, const frame & rhs);
-
+-->
     // Fast hashing support, O(1) complexity; Async-Handler-Safe. 
     std::size_t hash_value(const frame & f);
 
