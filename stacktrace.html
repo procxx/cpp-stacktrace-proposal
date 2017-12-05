@@ -108,7 +108,7 @@ Backtrace:
 		<p>Allows to check that stack trace capturing was successful.</p>
 		<h4><code>bool empty() const noexcept;</code></h4>
 		<p>Allows to check that stack trace failed.</p>
-		<h4><code>const std::vector&lt; boost::stacktrace::frame, Allocator &gt; & as_vector() const noexcept;</code></h4>
+		<h4><code>const std::vector&lt; std::stacktrace::frame, Allocator &gt; & as_vector() const noexcept;</code></h4>
 		<h3><code>basic_stacktrace</code> public static functions</h3>
 		<h4><code>template&lt;typename Char, typename Trait&gt; 
   static basic_stacktrace 
@@ -147,7 +147,7 @@ namespace std {
   namespace stacktrace {
     template&lt;typename Allocator&gt; class basic_stacktrace;
 
-    typedef basic_stacktrace stacktrace;  // This is the typedef to use unless you'd like to provide a specific allocator to boost::stacktrace::basic_stacktrace. 	
+    typedef basic_stacktrace stacktrace;  // This is the typedef to use unless you'd like to provide a specific allocator to std::stacktrace::basic_stacktrace.
     <!-- template&lt;typename Allocator1, typename Allocator2&gt; 
       bool operator&lt;(const basic_stacktrace&lt; Allocator1 &gt; &, 
                      const basic_stacktrace&lt; Allocator2 &gt; &);
