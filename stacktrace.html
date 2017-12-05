@@ -40,16 +40,16 @@
 	<p>Pretty often assertions can't describe the whole picture of bug and does not provide enough information to locate the problem. For example, you can see the following message on out-of-range access:
 	</p>
 	<p><code>
-	../../../boost/array.hpp:123: T& boost::array<T, N>::operator[](boost::array<T, N>::size_type) [with T = int; long unsigned int N = 5ul]: Assertion '(i < N)&&("out of range")' failed.
+	../../../boost/array.hpp:123: T& boost::array&lt;T, N&gt;::operator[](boost::array&lt;T, N&gt;::size_type) [with T = int; long unsigned int N = 5ul]: Assertion '(i &lt; N)&&("out of range")' failed.
 Aborted (core dumped)</code>
 	</p>
 	<p>This assert can be in any translation unit including the <code>boost/array.hpp</code> header.</p>
 	<p>With adding of the proposed classes you may see the following message:
 	<pre>
-Expression 'i < N' is false in function 'T& boost::array<T, N>::operator[](boost::array<T, N>::size_type) [with T = int; long unsigned int N = 5ul; boost::array<T, N>::reference = int&; boost::array<T, N>::size_type = long unsigned int]': out of range.
+Expression 'i &lt; N' is false in function 'T& boost::array&lt;T, N&gt;::operator[](boost::array&lt;T, N&gt;::size_type) [with T = int; long unsigned int N = 5ul; boost::array&lt;T, N&gt;::reference = int&; boost::array&lt;T, N&gt;::size_type = long unsigned int]': out of range.
 Backtrace:
  0# boost::assertion_failed_msg(char const*, char const*, char const*, char const*, long) at ../example/assert_handler.cpp:39
- 1# boost::array<int, 5ul>::operator[](unsigned long) at ../../../boost/array.hpp:124
+ 1# boost::array&lt;int, 5ul&gt;::operator[](unsigned long) at ../../../boost/array.hpp:124
  2# bar(int) at ../example/assert_handler.cpp:17
  3# foo(int) at ../example/assert_handler.cpp:25
  4# bar(int) at ../example/assert_handler.cpp:17
@@ -141,7 +141,7 @@ from_dump(const void * begin, std::size_t buffer_size_in_bytes,
 		<h4><code>frame(const frame &) = default;</code></h4>
 		<h4><code>explicit frame(native_frame_ptr_t addr) noexcept;</code></h4>
 		<p>Constructs frame that references addr and could later generate information about that address using platform specific features.</p>
-		<h4><code>template<typename T> explicit frame(T * function_addr) noexcept;</code></h4>
+		<h4><code>template&lt;typename T&gt; explicit frame(T * function_addr) noexcept;</code></h4>
 		<p>Constructs frame that references function_addr and could later generate information about that function using platform specific features.</p>
 		<h4><code>constexpr frame & operator=(const frame &) = default;</code></h4>
 		<h3><code>frame</code> public member functions</h3>
