@@ -109,6 +109,16 @@ Backtrace:
 		<h4><code>bool empty() const noexcept;</code></h4>
 		<p>Allows to check that stack trace failed.</p>
 		<h4><code>const std::vector&lt; std::stacktrace::frame, Allocator &gt; & as_vector() const noexcept;</code></h4>
+		<h3><code>basic_stacktrace</code> operator member functions</h3>
+		<h4>
+<pre>template &lt;typename Allocator1, typename Allocator2&gt;
+	  std::strong_ordering operator &lt;=&gt;(const basic_stacktrace&lt; Allocator1 &gt; & lhs,
+                     const basic_stacktrace&lt; Allocator2 &gt; & rhs) = default;
+</pre>
+		</h4>
+		<p>
+		    Auto-generated comparison operators that provide platform dependent ordering and have amortized O(1) complexity; O(size()) worst case complexity; are Async-Handler-Safe.
+		</p>
 		<h3><code>basic_stacktrace</code> public static functions</h3>
 		<h4><code>template&lt;typename Char, typename Trait&gt; 
   static basic_stacktrace 
@@ -140,6 +150,11 @@ from_dump(const void * begin, std::size_t buffer_size_in_bytes,
 		<p>Returns code line in the source line, where the function of the frame is defined. Throws std::bad_alloc if not enough memory to construct resulting string.</p>
 		<h4><code>constexpr bool empty() const;</code></h4>
 		<p>Checks that frame is not references NULL address.</p>
+		<h3><code>frame</code> operator member functions</h3>
+		<h4>std::strong_ordering operator &lt;=&gt;(const frame & lhs, const frame & rhs) = default;</h4>
+		<p>
+			Comparison operators that provide platform dependent ordering and have O(1) complexity; are Async-Handler-Safe.
+		</p>
         <h2>IV. Proposed Interface</h2>
 		<h3>Header &lt;stacktrace&gt;</h3>
 		<pre>
@@ -154,10 +169,6 @@ namespace std {
     template&lt;typename Allocator1, typename Allocator2&gt; 
       bool operator==(const basic_stacktrace&lt; Allocator1 &gt; &, 
                       const basic_stacktrace&lt; Allocator2 &gt; &); -->
-    // Auto-generated comparison operators that provide platform dependant ordering and have amortized O(1) complexity; O(size()) worst case complexity; are Async-Handler-Safe.
-	template &lt;typename Allocator1, typename Allocator2&gt;
-	  std::strong_ordering operator &lt;=&gt;(const basic_stacktrace&lt; Allocator1 &gt; & lhs, 
-                     const basic_stacktrace&lt; Allocator2 &gt; & rhs) = default;
 <!--    template&lt;typename Allocator1, typename Allocator2&gt; 
       bool operator&gt;(const basic_stacktrace&lt; Allocator1 &gt; & lhs, 
                      const basic_stacktrace&lt; Allocator2 &gt; & rhs);
@@ -186,9 +197,6 @@ namespace std {
 		<pre>
 namespace std {
   namespace stacktrace {
-
-    // Comparison operators that provide platform dependant ordering and have O(1) complexity; are Async-Handler-Safe. 
-	std::strong_ordering operator &lt;=&gt;(const frame & lhs, const frame & rhs) = default;
 <!--    constexpr bool operator&lt;(const frame & lhs, const frame & rhs);
     constexpr bool operator&gt;(const frame & lhs, const frame & rhs);
     constexpr bool operator&lt;=(const frame & lhs, const frame & rhs);
