@@ -182,21 +182,14 @@ namespace std {
       bool operator!=(const basic_stacktrace&lt; Allocator1 &gt; & lhs, 
                       const basic_stacktrace&lt; Allocator2 &gt; & rhs); -->
     // Fast hashing support, O(st.size()) complexity; Async-Handler-Safe. 
-    template&lt;typename Allocator&gt; 
+    template&lt;typename Allocator&gt;
       std::size_t hash_value(const basic_stacktrace&lt; Allocator &gt; & st);
 
-    // Outputs stacktrace in a human readable format to output stream; unsafe to use in async handlers. 
-    template&lt;typename CharT, typename TraitsT, typename Allocator&gt; 
-      std::basic_ostream&lt; CharT, TraitsT &gt; & 
-      operator&lt;&lt;(std::basic_ostream&lt; CharT, TraitsT &gt; & os, 
+    // Outputs stacktrace in a human readable format to output stream; unsafe to use in async handlers.
+    template&lt;typename CharT, typename TraitsT, typename Allocator&gt;
+      std::basic_ostream&lt; CharT, TraitsT &gt; &
+      operator&lt;&lt;(std::basic_ostream&lt; CharT, TraitsT &gt; & os,
                  const basic_stacktrace&lt; Allocator &gt; & bt);
-  }
-}
-		</pre>
-		<h3> Header &lt;frame&gt;</h3>
-		<pre>
-namespace std {
-  namespace stacktrace {
 <!--    constexpr bool operator&lt;(const frame & lhs, const frame & rhs);
     constexpr bool operator&gt;(const frame & lhs, const frame & rhs);
     constexpr bool operator&lt;=(const frame & lhs, const frame & rhs);
