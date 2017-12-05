@@ -103,13 +103,7 @@ Backtrace:
 		<p>Returns frame that references the actual frame info, stored inside *this.</p>
 		<p>Parameters: <code>frame_no</code> - zero-based index of frame to return. 0 is the function index where stacktrace was constructed and index close to this->size() contains function main().</p>
 		<h4><code>const_iterator begin() const noexcept;</code></h4>
-		<h4><code>const_iterator cbegin() const noexcept;</code></h4>
 		<h4><code>const_iterator end() const noexcept;</code></h4>
-		<h4><code>const_iterator cend() const noexcept;</code></h4>
-		<h4><code>const_reverse_iterator rbegin() const noexcept;</code></h4>
-		<h4><code>const_reverse_iterator crbegin() const noexcept;</code></h4>
-		<h4><code>const_reverse_iterator rend() const noexcept;</code></h4>
-		<h4><code>const_reverse_iterator crend() const noexcept;</code></h4>
 		<h4><code>explicit operator bool() const noexcept;</code></h4>
 		<p>Allows to check that stack trace capturing was successful.</p>
 		<h4><code>bool empty() const noexcept;</code></h4>
