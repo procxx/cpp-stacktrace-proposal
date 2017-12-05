@@ -149,7 +149,7 @@ from_dump(const void * begin, std::size_t buffer_size_in_bytes,
         <h2>IV. Proposed Interface</h2>
 		<h3>Header &lt;stacktrace&gt;</h3>
 		<pre>
-namespace boost {
+namespace std {
   namespace stacktrace {
     template&lt;typename Allocator&gt; class basic_stacktrace;
 
@@ -190,7 +190,7 @@ namespace boost {
 		</pre>
 		<h3> Header &lt;frame&gt;</h3>
 		<pre>
-namespace boost {
+namespace std {
   namespace stacktrace {
 
     // Comparison operators that provide platform dependant ordering and have O(1) complexity; are Async-Handler-Safe. 
