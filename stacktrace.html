@@ -110,7 +110,6 @@ Backtrace:
 		<p>Allows to check that stack trace capturing was successful.</p>
 		<h4><code>bool empty() const noexcept;</code></h4>
 		<p>Allows to check that stack trace failed.</p>
-		<h4><code>const std::vector&lt; std::stacktrace::frame, Allocator &gt; & as_vector() const noexcept;</code></h4>
 
 		<h3><code>basic_stacktrace</code> operator member functions</h3>
 		<h4>
@@ -122,17 +121,6 @@ Backtrace:
 		<p>
 		    Auto-generated comparison operators that provide platform dependent ordering and have amortized O(1) complexity; O(size()) worst case complexity; are Async-Handler-Safe.
 		</p>
-
-		<h3><code>basic_stacktrace</code> public static functions</h3>
-		<h4><code>template&lt;typename Char, typename Trait&gt; 
-  static basic_stacktrace 
-  from_dump(std::basic_istream&lt; Char, Trait &gt; & in, 
-            const allocator_type & a = allocator_type());</code></h4>
-		<p>Constructs stacktrace from basic_istreamable that references the dumped stacktrace. Terminating zero frame is discarded.</p>
-		<h4><code>static basic_stacktrace 
-from_dump(const void * begin, std::size_t buffer_size_in_bytes, 
-          const allocator_type & a = allocator_type());</code></h4>
-		<p>Constructs stacktrace from raw memory dump. Terminating zero frame is discarded.</p>
 
 		<h3><code>frame</code> constructors</h3>
 		<h4><code>frame() noexcept;</code></h4>
@@ -179,6 +167,7 @@ namespace std {
       std::basic_ostream&lt; CharT, TraitsT &gt; &
       operator&lt;&lt;(std::basic_ostream&lt; CharT, TraitsT &gt; & os,
                  const basic_stacktrace&lt; Allocator &gt; & bt);
+
     // Fast hashing support, O(1) complexity; Async-Handler-Safe. 
     std::size_t hash_value(const frame & f);
 
