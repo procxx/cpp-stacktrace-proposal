@@ -29,7 +29,7 @@
         <address>Alexey Gorgurov &lt;<a href="mailto:leha-bot@yandex.ru">leha-bot@yandex.ru</a>&gt;, &lt;<a href="mailto:no-vista@yandex.ru">no-vista@yandex.ru</a>&gt;</address>
         <address>Antony Polukhin &lt;<a href="mailto:antoshkka@gmail.com">antoshkka@gmail.com</a>&gt;, &lt;<a href="mailto:antoshkka@yandex-team.ru">antoshkka@yandex-team.ru</a>&gt;</address>
         <address>&nbsp;</address>
-        <address>Date: 2017-10-03</address>
+        <address>Date: 2017-12-12</address>
         <h1>A Proposal to add stack trace library</h1>
 
         <span class='changed-added'>Significant changes to <a href="http://github.com/leha-bot/cpp-stacktrace-proposal">P????R?</a> are marked with blue.</span> <button onclick="show_hide_deleted()">Show/Hide deleted lines from P????R?</button>
@@ -103,7 +103,7 @@ Backtrace:
 		<h4><code>size_type size() const noexcept;</code></h4>
 		<h4><code>const_reference operator[](std::size_t frame_no) const noexcept;</code></h4>
 		<p>Returns frame that references the actual frame info, stored inside *this.</p>
-		<p>Parameters: <code>frame_no</code> - zero-based index of frame to return. 0 is the function index where stacktrace was constructed and index close to this->size() contains function main().</p>
+		<p>Parameters: <code>frame_no</code> - zero-based index of frame to return. 0 is the function index where stacktrace was constructed and index close to this-&gt;size() contains function main().</p>
 		<h4><code>const_iterator begin() const noexcept;</code></h4>
 		<h4><code>const_iterator end() const noexcept;</code></h4>
 		<h4><code>explicit operator bool() const noexcept;</code></h4>
@@ -150,7 +150,7 @@ from_dump(const void * begin, std::size_t buffer_size_in_bytes,
 		<h4><code>constexpr native_frame_ptr_t address() const noexcept;</code></h4>
 		<p>Returns address of the frame function.</p>
 		<h4><code>std::string source_file() const;</code></h4>
-		<p>Returns path to the source file, where the function of the frame is defined. Returns empty string if this->source_line() == 0. Throws std::bad_alloc if not enough memory to construct resulting string.</p>
+		<p>Returns path to the source file, where the function of the frame is defined. Returns empty string if this-&gt;source_line() == 0. Throws std::bad_alloc if not enough memory to construct resulting string.</p>
 		<h4><code>std::string source_line() const;</code></h4>
 		<p>Returns code line in the source line, where the function of the frame is defined. Throws std::bad_alloc if not enough memory to construct resulting string.</p>
 		<h4><code>constexpr bool empty() const;</code></h4>
