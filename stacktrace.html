@@ -160,8 +160,8 @@ namespace std {
 
     typedef basic_stacktrace stacktrace;  // This is the typedef to use unless you'd like to provide a specific allocator to std::stacktrace::basic_stacktrace.
     // Fast hashing support, O(st.size()) complexity; Async-Handler-Safe. 
-    template&lt;typename Allocator&gt;
-      std::size_t hash_value(const basic_stacktrace&lt; Allocator &gt; & st);
+    template&lt;&gt;
+      struct hash&lt; basic_stacktrace &gt;;
 
     // Outputs stacktrace in a human readable format to output stream; unsafe to use in async handlers.
     template&lt;typename CharT, typename TraitsT, typename Allocator&gt;
@@ -170,7 +170,8 @@ namespace std {
                  const basic_stacktrace&lt; Allocator &gt; & bt);
 
     // Fast hashing support, O(1) complexity; Async-Handler-Safe. 
-    std::size_t hash_value(const frame & f);
+    template&lt;&gt;
+      struct hash&lt; frame &gt;;
 
     // Outputs stacktrace::frame in a human readable format to string; unsafe to use in async handlers. 
     std::string to_string(const frame & f);
