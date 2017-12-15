@@ -90,6 +90,7 @@ Backtrace:
 		<p>The design is based on Boost.Stacktrace, an popular library that does not depend on any non-standard library components and provides the STD-like interface.</p>
 		<p>Note about signal safety: we can't offer the proposal which could be signal-safe on any platform because it's not possible to implement. <!-- add note about custom allocator? --></p>
 		<p>The stack frame sequence is stored inside the <code>basic_stacktrace</code> class, the one stack frame is stored inside the <code>frame</code> class.</p>
+		<p>Note: the proposed classes decode stack only on user request. No implicit stack decoding.</p>
 
 		<h3><code>basic_stacktrace</code> constructors</h3>
 		<h4><code>basic_stacktrace() noexcept;</code></h4>
