@@ -58,7 +58,7 @@ Backtrace:
  7# 0x00007F991FD69F45 in /lib/x86_64-linux-gnu/libc.so.6
  8# 0x0000000000401139
 	</pre>
-	<p>We propose two headers (<code>&lt;stacktrace&gt;</code> and <code>&lt;frame&gt;</code>), two classes (<code>template &lt;typename Allocator&gt;class basic_stacktrace</code> and <code>class frame</code>) and several functions for safe stack frames dump.</p>
+	<p>We propose one header (<code>&lt;stacktrace&gt;</code>), two classes (<code>template &lt;typename Allocator&gt;class basic_stacktrace</code> and <code>class frame</code>) and several functions for safe stack frames dump.</p>
 
 	<!--<p>Current compilers can print a stack trace while debugging or crash dump for debugging purposes. The compiler's users also can get a stack trace via implementation-defined API. But there is no cross-platform solution (except Boost.Stacktrace on which this Proposal is based of).</p>
 	<p>This is an attempt to solve the problem in a generic way on a library level and provide wording for thing being a standard de-facto on all compilers.</p>
