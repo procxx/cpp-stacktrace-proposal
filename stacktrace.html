@@ -24,28 +24,27 @@
     <body bgcolor="#ffffff">
         <address>Document number: D0881R0</address>
         <address>Project: Programming Language C++</address>
-        <address>Audience: SG14 Library Evolution</address>
+        <address>Audience: Library Evolution</address>
         <address>&nbsp;</address>
         <address>Alexey Gorgurov &lt;<a href="mailto:leha-bot@yandex.ru">leha-bot@yandex.ru</a>&gt;, &lt;<a href="mailto:no-vista@yandex.ru">no-vista@yandex.ru</a>&gt;</address>
         <address>Antony Polukhin &lt;<a href="mailto:antoshkka@gmail.com">antoshkka@gmail.com</a>&gt;, &lt;<a href="mailto:antoshkka@yandex-team.ru">antoshkka@yandex-team.ru</a>&gt;</address>
         <address>&nbsp;</address>
-        <address>Date: 2017-12-12</address>
+        <address>Date: 2018-02-09</address>
         <h1>A Proposal to add stack trace library</h1>
 
-        <span class='changed-added'>Significant changes to <a href="http://github.com/leha-bot/cpp-stacktrace-proposal">D0881R?</a> are marked with blue.</span> <button onclick="show_hide_deleted()">Show/Hide deleted lines from D0881R?</button>
-        <p class='notes'>Green lines are notes for the <b>editor</b> or for the <b>SG14</b> that must not be treated as part of the wording.</p>
+        <!--p class='notes'>Green lines are notes for the <b>editor</b> or for the <b>SG14</b> that must not be treated as part of the wording.</p-->
         <h2>I. Motivation</h2>
-	<p>At this time there is no standard solution to get the calls sequence that results in unhandled exception, std::terminate or assertion failure. That sequence is widely used in another programming languages (like Java, C#, Python) for debugging and post mortem debugging.
-	</p>
-	<p>Pretty often assertions can't describe the whole picture of bug and does not provide enough information to locate the problem. For example, you can see the following message on out-of-range access:
-	</p>
-	<p><code>
-	../../../boost/array.hpp:123: T& boost::array&lt;T, N&gt;::operator[](boost::array&lt;T, N&gt;::size_type) [with T = int; long unsigned int N = 5ul]: Assertion '(i &lt; N)&&("out of range")' failed.
-Aborted (core dumped)</code>
-	</p>
-	<p>This assert can be in any translation unit including the <code>boost/array.hpp</code> header.</p>
-	<p>With adding of the proposed classes you may see the following message:
-	<pre>
+	<p>In the current working draft [<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/n4713.pdf">N4713</a>] there is no way to get,store and decode the current call sequence.
+	Such call sequences are useful for debugging and post mortem debugging. They are popular in other programming languages (like Java, C#, Python).</p>
+
+	<p>Pretty often assertions can't describe the whole picture of a bug and do not provide enough information to locate the problem.
+	For example, you can see the following message on out-of-range access:</p>
+<pre>
+boost/array.hpp:123: T& boost::array&lt;T, N&gt;::operator[](boost::array&lt;T, N&gt;::size_type): Assertion '(i &lt; N)&&("out of range")' failed.
+Aborted (core dumped)</pre>
+	<p>That's not enough information in the assert message to locate the problem without debugger.</p>
+	<p>This paper proposes classes that could simplify debugging and may change the assertion meassage into the following:</p>
+<pre>
 Expression 'i &lt; N' is false in function 'T& boost::array&lt;T, N&gt;::operator[](boost::array&lt;T, N&gt;::size_type) [with T = int; long unsigned int N = 5ul; boost::array&lt;T, N&gt;::reference = int&; boost::array&lt;T, N&gt;::size_type = long unsigned int]': out of range.
 Backtrace:
  0# boost::assertion_failed_msg(char const*, char const*, char const*, char const*, long) at ../example/assert_handler.cpp:39
@@ -57,140 +56,164 @@ Backtrace:
  6# main at ../example/assert_handler.cpp:54
  7# 0x00007F991FD69F45 in /lib/x86_64-linux-gnu/libc.so.6
  8# 0x0000000000401139
-	</pre>
-	<p>We propose one header (<code>&lt;stacktrace&gt;</code>), two classes (<code>template &lt;typename Allocator&gt;class basic_stacktrace</code> and <code>class frame</code>) and several functions for safe stack frames dump.</p>
-
-	<!--<p>Current compilers can print a stack trace while debugging or crash dump for debugging purposes. The compiler's users also can get a stack trace via implementation-defined API. But there is no cross-platform solution (except Boost.Stacktrace on which this Proposal is based of).</p>
-	<p>This is an attempt to solve the problem in a generic way on a library level and provide wording for thing being a standard de-facto on all compilers.</p>
-        <p>A proof of concept implementation available at: <a href="https://github.com/boostorg/stacktrace">https://github.com/boostorg/stacktrace</a>.</p>
-		-->
-<!--
-		NOTE: saved for example.
-        <h2>II. Changelog</h2>
-        <p>Differences with P????R0:</p>
-        <ul>
-           <li></li>
-        </ul>
-
--->
-<!--
-        <h2>II. Proposed wording</h2>
-	<p>X. Stacktrace library <span class="right">[stacktrace]</span></p>
-	<p>X.1. General <span class="right">[stacktrace.general]</span></p>
-	<p>X.2. Classes <span class="right">[stacktrace.classes]</span></p>
-	<p>X.2.1. Header &lt;stacktrace&gt; <span class="right">[stacktrace.syn]</span></p>
-	<p>X.2.2. Class template basic_stacktrace <span class="right">[basic.stacktrace]</span></p>
-	<p>X.2.2.1. basic_stacktrace non-member functions <span class="right">[stacktrace.nonmembers]</span></p>
-	<p>X.2.2.1.1. </p>
-	<p>X.2.2. Header &lt;stacktrace_fwd&gt; <span class="right">[stacktrace.fwd]</span></p>
-	-->
-		<h2>II. Impact on the Standard</h2>
-		<p>This proposal is a pure library extension and it do not break the existing code and do not degrade performance. It is does not require any changes in the core language and could be implemented in standard C++.</p>
-		<h2>III. Design Decisions</h2>
-		<p>The design is based on Boost.Stacktrace, an popular library that does not depend on any non-standard library components and provides the STD-like interface.</p>
-		<p>Note about signal safety: we can't offer the proposal which could be signal-safe on any platform because it's not possible to implement. <!-- add note about custom allocator? --></p>
-		<p>The stack frame sequence is stored inside the <code>basic_stacktrace</code> class, the one stack frame is stored inside the <code>frame</code> class.</p>
-		<p>Note: the proposed classes decode stack only on user request. No implicit stack decoding.</p>
-
-		<h3><code>basic_stacktrace</code> constructors</h3>
-		<h4><code>basic_stacktrace() noexcept;</code></h4>
-		<p>Stores the current function call sequence inside *this without any decoding or any other heavy platform specific operations.</p>
-		<h4><code>explicit basic_stacktrace(const allocator_type & a) noexcept;</code></h4>
-		<p>Stores the current function call sequence inside *this without any decoding or any other heavy platform specific operations.</p>
-		<h4><code>basic_stacktrace(std::size_t skip, std::size_t max_depth, const allocator_type & a = allocator_type()) noexcept;</code></h4>
-		<p>Stores [skip; skip + max_depth) of the current function call sequence inside *this without any decoding or any heavy platform specific operations.</p>
-
-		<h3><code>basic_stacktrace</code> member functions</h3>
-		<h4><code>size_type size() const noexcept;</code></h4>
-		<h4><code>const_reference operator[](std::size_t frame_no) const noexcept;</code></h4>
-		<p>Returns frame that references the actual frame info, stored inside *this.</p>
-		<p>Parameters: <code>frame_no</code> - zero-based index of frame to return. 0 is the function index where stacktrace was constructed and index close to this-&gt;size() contains function main().</p>
-		<h4><code>const_iterator begin() const noexcept;</code></h4>
-		<h4><code>const_iterator end() const noexcept;</code></h4>
-		<h4><code>explicit operator bool() const noexcept;</code></h4>
-		<p>Allows to check that stack trace capturing was successful.</p>
-		<h4><code>bool empty() const noexcept;</code></h4>
-		<p>Allows to check that stack trace failed.</p>
-
-		<h3><code>basic_stacktrace</code> operator member functions</h3>
-		<h4>
-<pre>template &lt;typename Allocator1, typename Allocator2&gt;
-	  std::strong_ordering operator &lt;=&gt;(const basic_stacktrace&lt; Allocator1 &gt; & lhs,
-                     const basic_stacktrace&lt; Allocator2 &gt; & rhs) = default;
 </pre>
-		</h4>
-		<p>
-		    Auto-generated comparison operators that provide platform dependent ordering and have amortized O(1) complexity; O(size()) worst case complexity; are Async-Handler-Safe.
-		</p>
 
-		<h3><code>frame</code> constructors</h3>
-		<h4><code>frame() noexcept;</code></h4>
-		<h4><code>explicit frame(native_frame_ptr_t addr) noexcept;</code></h4>
-		<p>Constructs frame that references NULL address. Calls to source_file() and source_line() will return empty string. Calls to source_line() will return 0.</p>
-		<h4><code>frame(const frame &) = default;</code></h4>
-		<h4><code>explicit frame(native_frame_ptr_t addr) noexcept;</code></h4>
-		<p>Constructs frame that references addr and could later generate information about that address using platform specific features.</p>
-		<h4><code>template&lt;typename T&gt; explicit frame(T * function_addr) noexcept;</code></h4>
-		<p>Constructs frame that references function_addr and could later generate information about that function using platform specific features.</p>
-		<h4><code>constexpr frame & operator=(const frame &) = default;</code></h4>
-		<h3><code>frame</code> public member functions</h3>
-		<h4><code>std::string name() const;</code></h4>
-		<p>Returns platform specific name of the frame (function name in a human readable form). Throws std::bad_alloc if not enough memory to construct resulting string.</p>
-		<h4><code>constexpr native_frame_ptr_t address() const noexcept;</code></h4>
-		<p>Returns address of the frame function.</p>
-		<h4><code>std::string source_file() const;</code></h4>
-		<p>Returns path to the source file, where the function of the frame is defined. Returns empty string if this-&gt;source_line() == 0. Throws std::bad_alloc if not enough memory to construct resulting string.</p>
-		<h4><code>std::string source_line() const;</code></h4>
-		<p>Returns code line in the source line, where the function of the frame is defined. Throws std::bad_alloc if not enough memory to construct resulting string.</p>
-		<h4><code>constexpr bool empty() const;</code></h4>
-		<p>Checks that frame is not references NULL address.</p>
+	<h2>II. Impact on the Standard</h2>
+	<p>This proposal is a pure library extension and it does not break the existing code and does not degrade performance.
+	It does not require any changes in the core language and could be implemented in the standard C++.</p>
 
-		<h3><code>frame</code> operator member functions</h3>
-		<h4>std::strong_ordering operator &lt;=&gt;(const frame & lhs, const frame & rhs) = default;</h4>
-		<p>
-			Comparison operators that provide platform dependent ordering and have O(1) complexity; are Async-Handler-Safe.
-		</p>
+	<h2>III. Design Decisions</h2>
+	<p>The design is based on the Boost.Stacktrace library, a popular library that does not depend on any non-standard library components.</p>
+	<p><b>Note about signal safety:</b> this proposal does not attempt to provide a signal-safe solution for capturing and decoding stacktraces.
+	Such functionality currently is not implementable on some of the popular platforms. However, the paper attempts to provide extendable solution, that may be made sygnal safe some day.</p>
+	<p><b>Note on performance:</b> during Boost.Stacktrace development phase many users requested a fast way to store stack trace, without decoding the function names. This functionality is preserved in the paper.</p>
 
-        <h2>IV. Proposed Interface</h2>
-		<h3>Header &lt;stacktrace&gt;</h3>
-		<pre>
+
+    <h2>IV. Proposed Interface</h2>
+	<h3>Header &lt;stacktrace&gt;</h3>
+	<pre>
 namespace std {
-  namespace stacktrace {
-    template&lt;typename Allocator&gt; class basic_stacktrace;
+  class stack_frame {
+  public:
+    using native_frame_ptr_t = <i>unspecified</i>;
 
-    typedef basic_stacktrace stacktrace;  // This is the typedef to use unless you'd like to provide a specific allocator to std::stacktrace::basic_stacktrace.
-    // Fast hashing support, O(st.size()) complexity; Async-Handler-Safe. 
-    template&lt;&gt;
-      struct hash&lt; basic_stacktrace &gt;;
+    // construct/copy/destruct
+    constexpr stack_frame() noexcept;
+    constexpr stack_frame(const stack_frame&amp;) noexcept = default;
+    constexpr stack_frame&amp; operator=(const stack_frame&amp;) = default;
 
-    // Outputs stacktrace in a human readable format to output stream; unsafe to use in async handlers.
-    template&lt;typename CharT, typename TraitsT, typename Allocator&gt;
-      std::basic_ostream&lt; CharT, TraitsT &gt; &
-      operator&lt;&lt;(std::basic_ostream&lt; CharT, TraitsT &gt; & os,
-                 const basic_stacktrace&lt; Allocator &gt; & bt);
+    explicit stack_frame(native_frame_ptr_t f) noexcept;
+    template&lt;typename T&gt; explicit stack_frame(T* address) noexcept;
 
-    // Fast hashing support, O(1) complexity; Async-Handler-Safe. 
-    template&lt;&gt;
-      struct hash&lt; frame &gt;;
+    constexpr native_frame_ptr_t address() const noexcept;
+    constexpr bool empty() const noexcept;
 
-    // Outputs stacktrace::frame in a human readable format to string; unsafe to use in async handlers. 
-    std::string to_string(const frame & f);
+    strong_ordering operator &lt;=&gt;(const stack_frame&amp; rhs) = default;
 
-    // Outputs stacktrace::frame in a human readable format to output stream; unsafe to use in async handlers. 
-    template&lt;typename CharT, typename TraitsT&gt; 
-      std::basic_ostream&lt; CharT, TraitsT &gt; & 
-      operator&lt;&lt;(std::basic_ostream&lt; CharT, TraitsT &gt; & os, const frame & f);
-  }
+    // functions that do decoding
+    string name() const;
+    string source_file() const;
+    size_t source_line() const;
+
+  private:
+    native_frame_ptr_t data; // exposiotion only
+  };
+
+
+  template&lt;typename Allocator&gt;
+  class basic_stacktrace {
+  public:
+    using value_type = stack_frame;
+    using const_reference = const value_type &amp;;
+    using size_type = <i>implementation-defined</i>;
+    using const_iterator = <i>implementation-defined</i>;
+    using allocaotr_type = Allocator;
+
+    // functions that capture current call sequence without decoding it
+    basic_stacktrace() noexcept;
+    explicit basic_stacktrace(const allocator_type&amp; a) noexcept;
+    basic_stacktrace(size_type skip, size_type max_depth, const allocator_type&amp; a = allocator_type()) noexcept;
+
+    // construct/copy/destruct
+    basic_stacktrace(const basic_stacktrace &);
+    basic_stacktrace(basic_stacktrace &&) noexcept;
+    basic_stacktrace & operator=(const basic_stacktrace &);
+    basic_stacktrace & operator=(basic_stacktrace &&);
+    ~basic_stacktrace();
+
+    // public member functions
+    size_type size() const noexcept;
+    const_reference operator[](size_type ) const noexcept;
+    const_iterator begin() const noexcept;
+    const_iterator end() const noexcept;
+
+    explicit operator bool() const noexcept;
+
+    template &lt;typename Allocator2&gt;
+    strong_ordering operator &lt;=&gt;(const basic_stacktrace&lt; Allocator2 &gt;&amp; rhs) = default;
+
+  private:
+    vector&lt;value_type&gt;    stack_frames; // exposition only
+  };
+
+  // This is the alias to use unless you'd like to provide a specific allocator to basic_stacktrace.
+  using stacktrace = basic_stacktrace&lt;allocator&lt;stack_frame&gt;&gt;;
+
+  // Outputs stacktrace in a human readable format to output stream; unsafe to use in async handlers.
+  template&lt;typename CharT, typename TraitsT, typename Allocator&gt;
+  basic_ostream&lt; CharT, TraitsT &gt; &amp; operator&lt;&lt;(basic_ostream&lt;CharT, TraitsT&gt;&amp; os, const basic_stacktrace&lt;Allocator&gt;&amp; bt);
+
+  // Outputs frame in a human readable format to string; unsafe to use in async handlers.
+  string to_string(const stack_frame&amp; f);
+
+  // Outputs frame in a human readable format to output stream; unsafe to use in async handlers.
+  template&lt;typename CharT, typename TraitsT&gt;
+  basic_ostream&lt; CharT, TraitsT &gt;&amp; operator&lt;&lt;(basic_ostream&lt;CharT, TraitsT&gt;&amp; os, const stack_frame&amp; f);
 }
 		</pre>
-		<h2>V. Feature-testing macro</h2>
-        <p>For the purposes of SG10 we recommend the feature-testing macro name <code>__cpp_lib_stacktrace</code>.</p>
+
+
+	<h3><code>stack_frame</code> constructors</h3>
+	<pre>stack_frame() noexcept;</pre>
+	<div class="desc">Constructs stack_frame that references NULL address. Calls to <code>source_file()</code> and <code>source_line()</code> will return empty string. Calls to <code>source_line()</code> will return 0.</div>
+
+	<pre>explicit stack_frame(native_frame_ptr_t addr) noexcept;
+template&lt;typename T&gt; explicit stack_frame(T * addr) noexcept;</pre>
+	<div class="desc">Constructs stack_frame that references addr and could later generate information about that address using platform specific features.</div>
+
+
+	<h3><code>stack_frame</code> member functions</h3>
+	<pre>std::string name() const;</pre>
+	<div class="desc">Returns platform specific name of the stack_frame (function name in a human readable form). Throws std::bad_alloc if not enough memory to construct resulting string.</div>
+
+	<pre>constexpr native_frame_ptr_t address() const noexcept;</pre>
+	<div class="desc">Returns address of the stack_frame.</div>
+
+	<pre>std::string source_file() const;</pre>
+	<div class="desc">Returns path to the source file, where the function of the frame is defined. Returns empty string if this->source_line() == 0. Throws std::bad_alloc if not enough memory to construct resulting string.</div>
+
+	<pre>std::string source_line() const;</pre>
+	<div class="desc">Returns code line in the source line, where the function of the frame is defined. Throws std::bad_alloc if not enough memory to construct resulting string.</div>
+
+	<pre>constexpr bool empty() const;</pre>
+	<div class="desc">Checks that stack_frame is not references NULL address.</div>
+
+
+
+
+
+
+
+	<h3><code>basic_stacktrace</code> constructors</h3>
+	<pre>basic_stacktrace() noexcept;
+explicit basic_stacktrace(const allocator_type & a) noexcept;</pre>
+
+	<div class="desc">Stores the current function call sequence inside *this without any decoding or any other heavy platform specific operations.</div>
+	<div class="desc">Any exception raised during this operation is
+	silently ignored. In case of exception <code>(bool)*this</code> is <code>false</code></div>
+
+<pre>basic_stacktrace(size_type skip, size_type max_depth, const allocator_type&amp; a = allocator_type()) noexcept;</pre>
+	<div class="desc">Stores [skip; skip + max_depth) of the current function call sequence inside *this without any decoding or any heavy platform specific operations.</div>
+	<div class="desc">Any exception raised during this operation is
+	silently ignored. In case of exception <code>(bool)*this</code> is <code>false</code></div>
+
+	<h3><code>basic_stacktrace</code> member functions</h3>
+	<pre>const_reference operator[](size_type frame_no) const noexcept;</pre>
+	<div class="desc">Returns frame that references the actual frame info, stored inside *this.</div>
+	<div class="desc">Parameters: <code>frame_no</code> - zero-based index of frame to return. 0 is the function index where stacktrace was constructed and index close to this->size() contains function main().</div>
+
+	<pre>explicit operator bool() const noexcept;</pre>
+	<div class="desc">Allows to check that stack trace capturing was successful.</div>
+
+
+	<h2>V. Feature-testing macro</h2>
+    <p>For the purposes of SG10 we recommend the feature-testing macro name <code>__cpp_lib_stacktrace</code>.</p>
 
         <script type="text/javascript">
             function colorize_texts(texts) {
                 for (var i = 0; i < texts.length; ++i) {
                     var text = texts[i].innerHTML;
-                    text = text.replace(/namespace|enum|void|constexpr|extern|noexcept|bool|template|class |struct|auto|const|typename|explicit|public|private|operator|#include|inline| char|typedef|static_assert|static_cast|static/g,"<span class='cppkeyword'>$&<\/span>");
+                    text = text.replace(/namespace|enum|void|constexpr|extern|noexcept|bool|template|class |struct|auto|const |typename|explicit|public|private|#include|inline|typedef|static_assert|static_cast|static/g,"<span class='cppkeyword'>$&<\/span>");
                     text = text.replace(/\/\/[\s\S]+?\n/g,"<span class='cppcomment'>$&<\/span>");
                     texts[i].innerHTML = text;
                 }
