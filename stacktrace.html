@@ -29,7 +29,7 @@
         <address>Alexey Gorgurov &lt;<a href="mailto:leha-bot@yandex.ru">leha-bot@yandex.ru</a>&gt;, &lt;<a href="mailto:no-vista@yandex.ru">no-vista@yandex.ru</a>&gt;</address>
         <address>Antony Polukhin &lt;<a href="mailto:antoshkka@gmail.com">antoshkka@gmail.com</a>&gt;, &lt;<a href="mailto:antoshkka@yandex-team.ru">antoshkka@yandex-team.ru</a>&gt;</address>
         <address>&nbsp;</address>
-        <address>Date: 2018-02-09</address>
+        <address>Date: 2018-01-23</address>
         <h1>A Proposal to add stack trace library</h1>
 
         <!--p class='notes'>Green lines are notes for the <b>editor</b> or for the <b>SG14</b> that must not be treated as part of the wording.</p-->
@@ -65,12 +65,45 @@ Backtrace:
 	<h2>III. Design Decisions</h2>
 	<p>The design is based on the Boost.Stacktrace library, a popular library that does not depend on any non-standard library components.</p>
 	<p><b>Note about signal safety:</b> this proposal does not attempt to provide a signal-safe solution for capturing and decoding stacktraces.
-	Such functionality currently is not implementable on some of the popular platforms. However, the paper attempts to provide extendable solution, that may be made sygnal safe some day.</p>
+	Such functionality currently is not implementable on some of the popular platforms. However, the paper attempts to provide extendable solution, that may be made signal safe some day.</p>
 	<p><b>Note on performance:</b> during Boost.Stacktrace development phase many users requested a fast way to store stack trace, without decoding the function names. This functionality is preserved in the paper.</p>
 
 
     <h2>IV. Proposed Interface</h2>
-	<h3>Header &lt;stacktrace&gt;</h3>
+	<h3>Header &lt;stacktrace&gt; synopsis</h3>
+	<pre>
+namespace std {
+
+  class stack_frame;
+
+  template&lt;typename Allocator&gt;
+  class basic_stacktrace;
+
+  // free functions
+
+  // This is the alias to use unless you'd like to provide a specific allocator to basic_stacktrace.
+  using stacktrace = basic_stacktrace&lt;allocator&lt;stack_frame&gt;&gt;;
+
+  // Outputs stacktrace in a human readable format to output stream.
+  template&lt;typename CharT, typename TraitsT, typename Allocator&gt;
+  basic_ostream&lt; CharT, TraitsT &gt; &amp; operator&lt;&lt;(basic_ostream&lt;CharT, TraitsT&gt;&amp; os, const basic_stacktrace&lt;Allocator&gt;&amp; bt);
+
+  // Outputs stacktrace in a human readable format to string.
+  template&lt;typename Allocator&gt;
+  string to_string(const basic_stacktrace&lt;Allocator&gt;&amp; f);
+
+  // Outputs frame in a human readable format to string.
+  string to_string(const stack_frame&amp; f);
+
+  // Outputs frame in a human readable format to output stream.
+  template&lt;typename CharT, typename TraitsT&gt;
+  basic_ostream&lt; CharT, TraitsT &gt;&amp; operator&lt;&lt;(basic_ostream&lt;CharT, TraitsT&gt;&amp; os, const stack_frame&amp; f);
+}
+		</pre>
+
+
+	<h3>Class stack_frame</h3>
+	<p>The stack_frame class stores a pointer to function and allows querying information about that function.</p>
 	<pre>
 namespace std {
   class stack_frame {
@@ -82,24 +115,56 @@ namespace std {
     constexpr stack_frame(const stack_frame&amp;) noexcept = default;
     constexpr stack_frame&amp; operator=(const stack_frame&amp;) = default;
 
-    explicit stack_frame(native_frame_ptr_t f) noexcept;
+    constexpr explicit stack_frame(native_frame_ptr_t f) noexcept;
     template&lt;typename T&gt; explicit stack_frame(T* address) noexcept;
 
     constexpr native_frame_ptr_t address() const noexcept;
-    constexpr bool empty() const noexcept;
+    constexpr explicit operator bool() const noexcept;
 
-    strong_ordering operator &lt;=&gt;(const stack_frame&amp; rhs) = default;
+    constexpr strong_ordering operator &lt;=&gt;(const stack_frame&amp; rhs) = default;
 
-    // functions that do decoding
+    // functions that querying information about stored address
     string name() const;
     string source_file() const;
     size_t source_line() const;
 
   private:
-    native_frame_ptr_t data; // exposiotion only
+    native_frame_ptr_t data; // exposition only
   };
+}
+		</pre>
 
 
+	<h3><code>stack_frame</code> constructors</h3>
+	<pre>stack_frame() noexcept;</pre>
+	<div class="desc">Constructs stack_frame that references nullptr address. Calls to <code>source_file()</code> and <code>source_line()</code> will return empty string. Calls to <code>source_line()</code> will return 0.</div>
+
+	<pre>explicit stack_frame(native_frame_ptr_t addr) noexcept;
+template&lt;typename T&gt; explicit stack_frame(T * addr) noexcept;</pre>
+	<div class="desc">Constructs stack_frame that references addr and could later generate information about that address using platform specific features.</div>
+
+
+	<h3><code>stack_frame</code> member functions</h3>
+	<pre>std::string name() const;</pre>
+	<div class="desc">Returns empty string or platform specific name of the function that the stored address is pointing to. Throws std::bad_alloc if not enough memory to construct resulting string.</div>
+
+	<pre>constexpr native_frame_ptr_t address() const noexcept;</pre>
+	<div class="desc">Returns address stored by this.</div>
+
+	<pre>std::string source_file() const;</pre>
+	<div class="desc">Returns empty string or path to the source file, where the function of the frame is defined. Returns empty string if this->source_line() == 0. Throws std::bad_alloc if not enough memory to construct resulting string.</div>
+
+	<pre>std::string source_line() const;</pre>
+	<div class="desc">Returns 0 or code line in the source file, where the function of the stored address is defined. Throws std::bad_alloc if not enough memory to construct resulting string.</div>
+
+	<pre>explicit operator bool() const noexcept;</pre>
+	<div class="desc">Returns true if this stores and address other than NULL.</div>
+
+
+	<h3>Class template &lt;basic_stacktrace&gt;</h3>
+	<p>The basic_stacktrace template class stores current call sequence on construction and provides functions for querying information about the call sequence.</p>
+	<pre>
+namespace std {
   template&lt;typename Allocator&gt;
   class basic_stacktrace {
   public:
@@ -109,7 +174,7 @@ namespace std {
     using const_iterator = <i>implementation-defined</i>;
     using allocaotr_type = Allocator;
 
-    // functions that capture current call sequence without decoding it
+    // functions that capture current call sequence
     basic_stacktrace() noexcept;
     explicit basic_stacktrace(const allocator_type&amp; a) noexcept;
     basic_stacktrace(size_type skip, size_type max_depth, const allocator_type&amp; a = allocator_type()) noexcept;
@@ -136,64 +201,19 @@ namespace std {
     vector&lt;value_type&gt;    stack_frames; // exposition only
   };
 
-  // This is the alias to use unless you'd like to provide a specific allocator to basic_stacktrace.
-  using stacktrace = basic_stacktrace&lt;allocator&lt;stack_frame&gt;&gt;;
-
-  // Outputs stacktrace in a human readable format to output stream; unsafe to use in async handlers.
-  template&lt;typename CharT, typename TraitsT, typename Allocator&gt;
-  basic_ostream&lt; CharT, TraitsT &gt; &amp; operator&lt;&lt;(basic_ostream&lt;CharT, TraitsT&gt;&amp; os, const basic_stacktrace&lt;Allocator&gt;&amp; bt);
-
-  // Outputs frame in a human readable format to string; unsafe to use in async handlers.
-  string to_string(const stack_frame&amp; f);
-
-  // Outputs frame in a human readable format to output stream; unsafe to use in async handlers.
-  template&lt;typename CharT, typename TraitsT&gt;
-  basic_ostream&lt; CharT, TraitsT &gt;&amp; operator&lt;&lt;(basic_ostream&lt;CharT, TraitsT&gt;&amp; os, const stack_frame&amp; f);
 }
 		</pre>
-
-
-	<h3><code>stack_frame</code> constructors</h3>
-	<pre>stack_frame() noexcept;</pre>
-	<div class="desc">Constructs stack_frame that references NULL address. Calls to <code>source_file()</code> and <code>source_line()</code> will return empty string. Calls to <code>source_line()</code> will return 0.</div>
-
-	<pre>explicit stack_frame(native_frame_ptr_t addr) noexcept;
-template&lt;typename T&gt; explicit stack_frame(T * addr) noexcept;</pre>
-	<div class="desc">Constructs stack_frame that references addr and could later generate information about that address using platform specific features.</div>
-
-
-	<h3><code>stack_frame</code> member functions</h3>
-	<pre>std::string name() const;</pre>
-	<div class="desc">Returns platform specific name of the stack_frame (function name in a human readable form). Throws std::bad_alloc if not enough memory to construct resulting string.</div>
-
-	<pre>constexpr native_frame_ptr_t address() const noexcept;</pre>
-	<div class="desc">Returns address of the stack_frame.</div>
-
-	<pre>std::string source_file() const;</pre>
-	<div class="desc">Returns path to the source file, where the function of the frame is defined. Returns empty string if this->source_line() == 0. Throws std::bad_alloc if not enough memory to construct resulting string.</div>
-
-	<pre>std::string source_line() const;</pre>
-	<div class="desc">Returns code line in the source line, where the function of the frame is defined. Throws std::bad_alloc if not enough memory to construct resulting string.</div>
-
-	<pre>constexpr bool empty() const;</pre>
-	<div class="desc">Checks that stack_frame is not references NULL address.</div>
-
-
-
-
-
-
 
 	<h3><code>basic_stacktrace</code> constructors</h3>
 	<pre>basic_stacktrace() noexcept;
 explicit basic_stacktrace(const allocator_type & a) noexcept;</pre>
 
-	<div class="desc">Stores the current function call sequence inside *this without any decoding or any other heavy platform specific operations.</div>
+	<div class="desc">Stores the current call sequence inside *this without querying information about each call.</div>
 	<div class="desc">Any exception raised during this operation is
 	silently ignored. In case of exception <code>(bool)*this</code> is <code>false</code></div>
 
 <pre>basic_stacktrace(size_type skip, size_type max_depth, const allocator_type&amp; a = allocator_type()) noexcept;</pre>
-	<div class="desc">Stores [skip; skip + max_depth) of the current function call sequence inside *this without any decoding or any heavy platform specific operations.</div>
+	<div class="desc">Stores [skip; skip + max_depth) of the current function call sequence inside *this without querying information about each call.</div>
 	<div class="desc">Any exception raised during this operation is
 	silently ignored. In case of exception <code>(bool)*this</code> is <code>false</code></div>
 
@@ -203,7 +223,7 @@ explicit basic_stacktrace(const allocator_type & a) noexcept;</pre>
 	<div class="desc">Parameters: <code>frame_no</code> - zero-based index of frame to return. 0 is the function index where stacktrace was constructed and index close to this->size() contains function main().</div>
 
 	<pre>explicit operator bool() const noexcept;</pre>
-	<div class="desc">Allows to check that stack trace capturing was successful.</div>
+	<div class="desc">Returns true if call sequence was successfully stored.</div>
 
 
 	<h2>V. Feature-testing macro</h2>
